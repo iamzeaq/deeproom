@@ -1,0 +1,22 @@
+<!-- First-run onboarding hint above the orb's time label. Scene scale 0.1. -->
+<style>
+  .pill {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-radius: 14px;
+    border-width: 1px;
+    border-color: #e8b26a;
+    background-color: #241d14;
+  }
+
+  .hint {
+    color: #ffe9c7;
+    font-size: 14px;
+    font-weight: 700;
+  }
+</style>
+<div class="pill">
+  <span id="hint-text" class="hint">Pinch to grab</span>
+</div>

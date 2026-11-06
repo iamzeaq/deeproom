@@ -261,6 +261,37 @@
         },
         "ChimeAudio": {}
       }
+    },
+    {
+      "id": "hint-label",
+      "name": "Hint Label",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "ui-hint-label"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.39,
+          -0.5
+        ],
+        "scale": 0.1
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "hint",
+          "offset": [
+            0,
+            0.19,
+            0
+          ]
+        }
+      }
     }
   ],
   "authoring": {

@@ -10,7 +10,20 @@ import {
 import { FAST_SESSION_SECONDS, isFastMode } from './dev-flags.js';
 import { FocusOrb } from './orb-components.js';
 import { ReleaseTracker } from './release-tracker.js';
-import { loadPrefs, loadStats, recordCompletedSession, savePrefs } from './storage.js';
+import {
+  isOnboarded,
+  loadPrefs,
+  loadStats,
+  recordCompletedSession,
+  savePrefs,
+  setOnboarded,
+} from './storage.js';
+
+/** Onboarding hint steps (see SessionUISystem for the copy). */
+const HINT_GRAB = 0;
+const HINT_DRAG = 1;
+const HINT_TAP = 2;
+const HINT_DONE = 3;
 import {
   DURATIONS_MIN,
   FocusSession,
@@ -89,6 +102,7 @@ export class SessionSystem extends createSystem({
     entity.setValue(FocusSession, 'durationIndex', prefs.durationIndex);
     entity.setValue(FocusSession, 'envIndex', prefs.envIndex);
     entity.setValue(FocusSession, 'muted', prefs.muted);
+    entity.setValue(FocusSession, 'hintStep', isOnboarded() ? HINT_DONE : HINT_GRAB);
     const stats = loadStats();
     entity.setValue(FocusSession, 'sessions', stats.sessions);
     entity.setValue(FocusSession, 'streak', stats.streak);
@@ -150,6 +164,14 @@ export class SessionSystem extends createSystem({
     this.mode = 'pending';
     this.baseIndex = entity.getValue(FocusSession, 'durationIndex') ?? 2;
     entity.setValue(FocusSession, 'cardTime', 0);
+    this.advanceHint(entity, HINT_GRAB, HINT_DRAG);
+  }
+
+  /** Moves onboarding from step `from` to `to`; finishing it is remembered. */
+  private advanceHint(entity: Entity, from: number, to: number): void {
+    if (entity.getValue(FocusSession, 'hintStep') !== from) return;
+    entity.setValue(FocusSession, 'hintStep', to);
+    if (to === HINT_DONE) setOnboarded();
   }
 
   private trackHeld(entity: Entity, delta: number): void {
@@ -181,6 +203,7 @@ export class SessionSystem extends createSystem({
     );
     if (index !== entity.getValue(FocusSession, 'durationIndex')) {
       entity.setValue(FocusSession, 'durationIndex', index);
+      this.advanceHint(entity, HINT_DRAG, HINT_TAP);
     }
     // Keep the orb at rest while dialing, with a slight follow for feedback.
     this.local.copy(this.restPos);
@@ -221,6 +244,12 @@ export class SessionSystem extends createSystem({
     entity.setValue(FocusSession, 'remaining', seconds);
     entity.setValue(FocusSession, 'outcome', SessionOutcome.None);
     entity.setValue(FocusSession, 'cardTime', 0);
+    // Starting a session completes onboarding, whichever hint was showing.
+    if ((entity.getValue(FocusSession, 'hintStep') ?? HINT_DONE) < HINT_DONE) {
+      entity.setValue(FocusSession, 'hintStep', HINT_DONE);
+      setOnboarded();
+    }
+    this.persistPrefs(entity);
     this.setPhase(entity, SessionPhase.FadingIn);
   }
 

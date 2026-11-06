@@ -25,4 +25,5 @@ export default defineAssets({
   'ui-time-label': uikitml('time-label.uikitml', 'Time Label'),
   'ui-remaining-label': uikitml('remaining-label.uikitml', 'Remaining Label'),
   'ui-finish-card': uikitml('finish-card.uikitml', 'Finish Card'),
+  'ui-hint-label': uikitml('hint-label.uikitml', 'Hint Label'),
 });
