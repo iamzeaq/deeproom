@@ -110,6 +110,106 @@
           ]
         }
       }
+    },
+    {
+      "id": "remaining-label",
+      "name": "Remaining Label",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "ui-remaining-label"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.1,
+          -0.5
+        ],
+        "scale": 0.1
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "remaining",
+          "offset": [
+            0,
+            -0.1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "env-sphere",
+      "name": "Environment Sphere",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "env-sphere",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          0,
+          1.2,
+          0
+        ]
+      },
+      "components": {
+        "EnvironmentSphere": {}
+      }
+    },
+    {
+      "id": "ambient-1",
+      "name": "Ambient 1",
+      "transform": {
+        "position": [
+          0,
+          1.2,
+          0
+        ]
+      },
+      "components": {
+        "AudioSource": {
+          "src": "./audio/ambient1.mp3",
+          "loop": true,
+          "volume": 0.6,
+          "positional": false
+        },
+        "AmbientAudio": {
+          "envIndex": 0
+        }
+      }
+    },
+    {
+      "id": "ambient-2",
+      "name": "Ambient 2",
+      "transform": {
+        "position": [
+          0,
+          1.2,
+          0
+        ]
+      },
+      "components": {
+        "AudioSource": {
+          "src": "./audio/ambient2.mp3",
+          "loop": true,
+          "volume": 0.6,
+          "positional": false
+        },
+        "AmbientAudio": {
+          "envIndex": 1
+        }
+      }
     }
   ],
   "authoring": {
