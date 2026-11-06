@@ -9,6 +9,7 @@ import {
   XRPlane,
 } from '@iwsdk/core';
 import { FocusOrb } from './orb-components.js';
+import { FocusSession, SessionPhase } from './session-components.js';
 
 /** Minimal view of a WebXR XRPlane; lib.dom does not ship these types. */
 interface DetectedPlane {
@@ -73,7 +74,13 @@ export class OrbPlacementSystem extends createSystem({
         entity.setValue(FocusOrb, 'onSurface', false);
       }),
       this.queries.held.subscribe('disqualify', (entity) => {
-        if (entity.active) this.snapToSurface(entity);
+        // Only place the orb between sessions; running sessions own its motion.
+        const phase = entity.hasComponent(FocusSession)
+          ? entity.getValue(FocusSession, 'phase')
+          : SessionPhase.Idle;
+        if (entity.active && phase === SessionPhase.Idle) {
+          this.snapToSurface(entity);
+        }
       }),
     );
   }

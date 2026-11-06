@@ -3,9 +3,24 @@
   "units": "meters",
   "components": {
     "com.iwsdk.components.IBLGradient": {
-      "sky": [0.96, 0.94, 0.9, 1],
-      "equator": [0.8, 0.76, 0.7, 1],
-      "ground": [0.46, 0.42, 0.38, 1],
+      "sky": [
+        0.96,
+        0.94,
+        0.9,
+        1
+      ],
+      "equator": [
+        0.8,
+        0.76,
+        0.7,
+        1
+      ],
+      "ground": [
+        0.46,
+        0.42,
+        0.38,
+        1
+      ],
       "intensity": 0.6
     }
   },
@@ -20,7 +35,9 @@
       "id": "focus-orb",
       "name": "Focus Orb",
       "metadata": {
-        "iwsdk.validation": { "allowFloating": true }
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
       },
       "content": {
         "type": "asset",
@@ -29,7 +46,11 @@
         "receiveShadow": false
       },
       "transform": {
-        "position": [0, 1.2, -0.5]
+        "position": [
+          0,
+          1.2,
+          -0.5
+        ]
       },
       "components": {
         "FocusOrb": {
@@ -41,9 +62,57 @@
         "OneHandGrabbable": {
           "rotate": false,
           "translate": true
+        },
+        "FocusSession": {
+          "phase": "idle",
+          "outcome": "none",
+          "durationIndex": 2,
+          "duration": 0,
+          "remaining": 0,
+          "phaseTime": 0,
+          "envIndex": 0,
+          "muted": false,
+          "fastMode": false,
+          "hintStep": 3,
+          "cardTime": 0,
+          "sessions": 0,
+          "streak": 0
+        }
+      }
+    },
+    {
+      "id": "time-label",
+      "name": "Time Label",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "ui-time-label"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.315,
+          -0.5
+        ],
+        "scale": 0.1
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "timeLabel",
+          "offset": [
+            0,
+            0.115,
+            0
+          ]
         }
       }
     }
   ],
-  "authoring": { "views": [] }
+  "authoring": {
+    "views": []
+  }
 }

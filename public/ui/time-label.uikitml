@@ -1,0 +1,34 @@
+<!--
+  Duration dial label shown above the focus orb. Chevrons hint at the
+  vertical drag. Scene scale 0.1, so 10px here is 1 cm in the world.
+-->
+<style>
+  .root {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 18px;
+    background-color: #17181c;
+  }
+
+  .chevron {
+    width: 16px;
+    height: 16px;
+    color: #c9b89c;
+  }
+
+  .time {
+    color: #fdf3e3;
+    font-size: 22px;
+    font-weight: 700;
+  }
+</style>
+<div class="root">
+  <ChevronUp class="chevron"></ChevronUp>
+  <span id="time-text" class="time">25 min</span>
+  <ChevronDown class="chevron"></ChevronDown>
+</div>
