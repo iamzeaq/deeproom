@@ -37,8 +37,12 @@ import {
 export const FADE_SECONDS = 3;
 /** A pinch shorter than this with little travel counts as a tap. */
 const TAP_MAX_SECONDS = 0.4;
-/** Dev fast mode allows slow taps so slow emulators/recorders can trigger them. */
-const FAST_TAP_MAX_SECONDS = 3;
+/**
+ * Longest frame counted toward tap duration. Emulators (IWER) and first-grab
+ * hitches can deliver multi-second frames, which would otherwise turn a quick
+ * pinch-and-release into a "hold" and silently swallow the tap.
+ */
+const TAP_MAX_FRAME_SECONDS = 1 / 30;
 const TAP_MAX_TRAVEL = 0.025;
 /** Horizontal hand travel that turns a pinch into a move. */
 const MOVE_START = 0.04;
@@ -200,7 +204,7 @@ export class SessionSystem extends createSystem({
 
   private trackHeld(entity: Entity, delta: number): void {
     this.readHand(this.hand, entity);
-    this.grabSeconds += delta;
+    this.grabSeconds += Math.min(delta, TAP_MAX_FRAME_SECONDS);
     this.release.sample(this.hand.x, this.hand.y, this.hand.z, delta);
     const dx = this.hand.x - this.startHand.x;
     const dy = this.hand.y - this.startHand.y;
@@ -251,10 +255,11 @@ export class SessionSystem extends createSystem({
       this.persistPrefs(entity);
       return;
     }
-    const tapWindow = entity.getValue(FocusSession, 'fastMode')
-      ? FAST_TAP_MAX_SECONDS
-      : TAP_MAX_SECONDS;
-    if (this.grabSeconds <= tapWindow && this.travel <= TAP_MAX_TRAVEL) {
+    // Dev fast mode ignores tap duration: any release without travel or a dial
+    // starts the session, so slow emulators and recorders can always trigger it.
+    const quick =
+      entity.getValue(FocusSession, 'fastMode') || this.grabSeconds <= TAP_MAX_SECONDS;
+    if (quick && this.travel <= TAP_MAX_TRAVEL) {
       this.startSession(entity);
     }
   }
