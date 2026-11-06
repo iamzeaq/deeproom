@@ -10,6 +10,7 @@ import {
 import { FAST_SESSION_SECONDS, isFastMode } from './dev-flags.js';
 import { FocusOrb } from './orb-components.js';
 import { ReleaseTracker } from './release-tracker.js';
+import { loadPrefs, loadStats, recordCompletedSession, savePrefs } from './storage.js';
 import {
   DURATIONS_MIN,
   FocusSession,
@@ -84,6 +85,22 @@ export class SessionSystem extends createSystem({
     if (this.initialized.has(entity)) return;
     this.initialized.add(entity);
     entity.setValue(FocusSession, 'fastMode', isFastMode());
+    const prefs = loadPrefs();
+    entity.setValue(FocusSession, 'durationIndex', prefs.durationIndex);
+    entity.setValue(FocusSession, 'envIndex', prefs.envIndex);
+    entity.setValue(FocusSession, 'muted', prefs.muted);
+    const stats = loadStats();
+    entity.setValue(FocusSession, 'sessions', stats.sessions);
+    entity.setValue(FocusSession, 'streak', stats.streak);
+  }
+
+  /** Persists the user's duration, environment and mute choices. */
+  protected persistPrefs(entity: Entity): void {
+    savePrefs({
+      durationIndex: entity.getValue(FocusSession, 'durationIndex') ?? 2,
+      envIndex: entity.getValue(FocusSession, 'envIndex') ?? 0,
+      muted: entity.getValue(FocusSession, 'muted') ?? false,
+    });
   }
 
   update(delta: number): void {
@@ -184,6 +201,7 @@ export class SessionSystem extends createSystem({
     if (phase !== SessionPhase.Idle) return;
     if (this.mode === 'dial') {
       this.setWorldPosition(entity, this.restPos);
+      this.persistPrefs(entity);
       return;
     }
     const tapWindow = entity.getValue(FocusSession, 'fastMode')
@@ -209,8 +227,9 @@ export class SessionSystem extends createSystem({
   /** Ends a running session; `completed` false means it was cancelled. */
   private finish(entity: Entity, completed: boolean): void {
     if (completed) {
-      entity.setValue(FocusSession, 'sessions', (entity.getValue(FocusSession, 'sessions') ?? 0) + 1);
-      entity.setValue(FocusSession, 'streak', Math.max(1, entity.getValue(FocusSession, 'streak') ?? 0));
+      const stats = recordCompletedSession();
+      entity.setValue(FocusSession, 'sessions', stats.sessions);
+      entity.setValue(FocusSession, 'streak', stats.streak);
     }
     entity.setValue(
       FocusSession,
