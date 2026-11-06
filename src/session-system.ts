@@ -9,6 +9,7 @@ import {
 } from '@iwsdk/core';
 import { FAST_SESSION_SECONDS, isFastMode } from './dev-flags.js';
 import { FocusOrb } from './orb-components.js';
+import { ReleaseTracker } from './release-tracker.js';
 import {
   DURATIONS_MIN,
   FocusSession,
@@ -31,6 +32,8 @@ const DIAL_START = 0.03;
 const DIAL_STEP = 0.05;
 /** Horizontal travel that aborts a dial into a move (time is restored). */
 const DIAL_ABORT = 0.1;
+/** Release hand speed (m/s) that counts as a flick and cancels a session. */
+const FLICK_SPEED = 1.2;
 /** Seconds the finish card stays up after a completed session. */
 const CARD_SECONDS = 6;
 
@@ -57,6 +60,8 @@ export class SessionSystem extends createSystem({
   private travel = 0;
   private mode: GrabMode = 'pending';
   private baseIndex = 0;
+  private release = new ReleaseTracker();
+  private returning: Entity | null = null;
   private blurred = false;
 
   init(): void {
@@ -88,6 +93,24 @@ export class SessionSystem extends createSystem({
       }
       this.advance(entity, delta);
     }
+    this.updateReturn(delta);
+  }
+
+  private updateReturn(delta: number): void {
+    const entity = this.returning;
+    const object = entity?.object3D;
+    if (entity == null || object == null || !entity.active || entity.hasComponent(Grabbed)) {
+      this.returning = null;
+      return;
+    }
+    object.getWorldPosition(this.hand);
+    if (this.hand.distanceToSquared(this.restPos) < 1e-6) {
+      this.setWorldPosition(entity, this.restPos);
+      this.returning = null;
+      return;
+    }
+    this.hand.lerp(this.restPos, Math.min(1, delta * 8));
+    this.setWorldPosition(entity, this.hand);
   }
 
   private readHand(out: Vector3, entity: Entity): void {
@@ -102,6 +125,8 @@ export class SessionSystem extends createSystem({
     this.holding = true;
     this.holderHand = this.grabSystem?.getHolderHand(entity) ?? 'right';
     this.readHand(this.startHand, entity);
+    this.release.reset(this.startHand.x, this.startHand.y, this.startHand.z);
+    this.returning = null;
     entity.object3D?.getWorldPosition(this.restPos);
     this.grabSeconds = 0;
     this.travel = 0;
@@ -113,6 +138,7 @@ export class SessionSystem extends createSystem({
   private trackHeld(entity: Entity, delta: number): void {
     this.readHand(this.hand, entity);
     this.grabSeconds += delta;
+    this.release.sample(this.hand.x, this.hand.y, this.hand.z, delta);
     const dx = this.hand.x - this.startHand.x;
     const dy = this.hand.y - this.startHand.y;
     const dz = this.hand.z - this.startHand.z;
@@ -148,6 +174,13 @@ export class SessionSystem extends createSystem({
   private onGrabEnd(entity: Entity): void {
     this.holding = false;
     const phase = entity.getValue(FocusSession, 'phase');
+    if (phase === SessionPhase.FadingIn || phase === SessionPhase.Running) {
+      if (this.release.isFlick(FLICK_SPEED)) {
+        this.finish(entity, false);
+        this.returning = entity; // ease the thrown orb back to its rest spot
+      }
+      return;
+    }
     if (phase !== SessionPhase.Idle) return;
     if (this.mode === 'dial') {
       this.setWorldPosition(entity, this.restPos);
