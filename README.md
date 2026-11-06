@@ -1,45 +1,59 @@
-# IWSDK App
+# Deeproom
 
-This project uses `iwsdk.config.json` for declarative scene, asset, component,
-XR, and emulator configuration. Application systems remain explicit in
-`src/index.ts`.
+A hands-first mixed-reality focus timer for Meta Quest 3, built on IWSDK.
+Seated use, no controllers required.
+
+## The loop
+
+1. Enter XR. A glowing orb appears about 50 cm in front of you at desk height,
+   in passthrough.
+2. **Pinch to grab** the orb and place it. Released a little above a detected
+   table, it settles onto the surface and is anchored there; otherwise it stays
+   where you let go.
+3. **Drag up/down** while pinching to pick 5 / 15 / 25 / 45 min. Pinch one of
+   the two small orbs beside it to choose an environment; pinch the speaker
+   token to mute.
+4. **Tap** (a quick pinch) the orb to begin. Over 3 s the 360 environment and
+   its ambient loop fade in; the orb slowly shrinks and pulses, with the time
+   left shown underneath.
+5. When time is up: a chime, a 3 s fade back to passthrough, and a
+   "+1 session · N-day streak" card.
+6. **Flick** (throw) the orb during a session to cancel. Nothing is counted.
+
+First-run hints walk through grab, drag, and tap once. Streak, session count,
+and your duration/environment/mute choices are stored in `localStorage`.
+
+## Develop
 
 ```sh
 npm install
 npm run dev
 ```
 
-Use the Runtime and Editor controls in the managed browser to switch between
-the running experience and its authored scene.
+Open the app with `?fast=1` (dev server only) to make every session 10 seconds
+long, so the whole loop can be tested or filmed quickly. Fast mode also accepts
+slow taps (up to 3 s) for laggy emulators and screen recorders.
 
-## Starter content
+## Assets to replace
 
-The robot and welcome panel are small examples of authored scene content plus
-runtime systems. The robot turns toward the player's head and plays a sound
-when pressed. To remove the robot, delete its scene node, its `RobotSystem`
-registration from `src/index.ts` or `src/index.js`, and its `Robot` registration
-from `src/components.ts` or `src/components.js`; you can then delete the unused
-robot component and system files. To remove the welcome panel, delete its scene
-node and its `PanelSystem` registration from the application entry point.
+Placeholders, keep the file names when dropping in CC0 assets:
 
-The robot stands on the second of three numbered stations. The first holds dark
-pieces you can grab and move, and the third holds a ring you can spin in place.
-The studio props (the plinths and the dark pieces, plus the floor and stage in VR
-and Desktop 3D) are built in code in `src/scene-assets/studio.scene-asset.ts` or
-`.js`. The VR and Desktop 3D background furniture is built the same way in
-`src/scene-assets/decor.scene-asset.ts` or `.js`, so the starter downloads no
-extra models. To remove any of them, delete their scene nodes and their entries
-in `src/assets.ts` or `src/assets.js`, then delete the files you no longer use.
-The station labels are `public/ui/label-*.uikitml`.
+| File | Placeholder |
+| --- | --- |
+| `public/environments/env1.jpg`, `env2.jpg` | 1024x512 generated gradient skies (equirectangular) |
+| `public/audio/ambient1.mp3`, `ambient2.mp3` | 8 s generated loops, **WAV data under an .mp3 name** (Chromium detects the format from content) |
+| `public/audio/chime.mp3` | starter chime |
 
-The rest of the look is built-in components in the scene, which you can edit in
-the editor without code. The soft light on every object is the scene root's
-`IBLGradient` (select the Level Root to edit it), and the soft shadows under
-each object are `ContactShadow` nodes. In VR and Desktop 3D, the sky is the
-scene root's `DomeGradient` (its colors, tilt and dither are also on the Level
-Root), and the floor fades into it through the `DomeFade` on the floor node. AR
-projects have no sky or floor, so passthrough stays visible, and a
-`ShadowCatcher` node grounds the stations.
+Equirectangular images (2:1) of 2048x1024 or smaller keep memory low on Quest.
 
-- Minimal scene walkthrough: https://iwsdk.dev/guides/01b-minimal-scene.html
-- XR-enabled projects — IWER emulator controls: https://iwsdk.dev/guides/02-testing-experience.html#iwer-controls
+## Code map
+
+- `src/session-system.ts`: pinch gestures (tap, time dial, flick) and the session state machine
+- `src/immersion.ts`: environment fade, ambient/chime audio, mute, orb shrink and pulse
+- `src/session-ui.ts`: orb-attached labels and controls, facing the user
+- `src/orb-placement.ts`: spawn in front of the user, table snap and anchoring
+- `src/storage.ts`: streak/prefs/onboarding persistence (all access try/catch)
+- `src/release-tracker.ts`: hand-speed tracking for flick detection
+- `src/session-components.ts`, `src/orb-components.ts`: ECS components
+- `src/scene-assets/`: procedural orb, picker orbs, mute token, environment sphere
+- `public/scenes/main.iwsdk.scene.json`, `public/ui/*.uikitml`: composition and labels
