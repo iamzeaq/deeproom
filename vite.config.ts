@@ -6,10 +6,47 @@
  */
 
 import { iwsdkDev } from '@iwsdk/vite-plugin-dev';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+
+/**
+ * IWER (IWSDK's browser-based WebXR emulator) normally activates only by
+ * hostname (`localhost`). This lets `?emulate=1` turn it on for any host, in
+ * both the dev server and the production build (which injects IWER because
+ * `dev.emulator.injectOnBuild` is set in iwsdk.config.json). Without the flag,
+ * dev keeps the localhost default and production never emulates, so real
+ * WebXR browsers and headsets are untouched.
+ */
+function emulateUrlFlag(): Plugin {
+  const RUNTIME_MODULE = '\0/@iwer-injection-runtime';
+  const START_CALL = /startIwsdkDevRuntime\((\{[\s\S]*?\})\);/;
+  let isBuild = false;
+  return {
+    name: 'deeproom:emulate-url-flag',
+    enforce: 'post',
+    configResolved(config) {
+      isBuild = config.command === 'build';
+    },
+    transform(code, id) {
+      if (id !== RUNTIME_MODULE) return null;
+      if (!START_CALL.test(code)) {
+        this.warn('IWER runtime start call not found; ?emulate=1 is inactive');
+        return null;
+      }
+      const fallback = isBuild ? "'off'" : 'cfg.activation';
+      return code.replace(
+        START_CALL,
+        (_match, cfg: string) => `const cfg = ${cfg};
+let emulate = false;
+try { emulate = new URLSearchParams(location.search).get('emulate') === '1'; } catch {}
+cfg.activation = emulate ? 'always' : ${fallback};
+startIwsdkDevRuntime(cfg);`,
+      );
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [iwsdkDev()],
+  plugins: [iwsdkDev(), emulateUrlFlag()],
   server: { host: '0.0.0.0', port: 8081, open: false },
   build: {
     outDir: 'dist',

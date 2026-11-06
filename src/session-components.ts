@@ -33,7 +33,7 @@ export const FocusSession = createComponent('FocusSession', {
   phaseTime: { type: Types.Float32, default: 0 },
   envIndex: { type: Types.Int8, default: 0, min: 0, max: 1 },
   muted: { type: Types.Boolean, default: false },
-  /** Dev only: sessions last 10 seconds (set from the ?fast=1 URL flag). */
+  /** Sessions last 10 seconds (set from the ?fast=1 URL flag). */
   fastMode: { type: Types.Boolean, default: false },
   /** Onboarding hint shown: 0 grab, 1 drag, 2 tap, 3 done. */
   hintStep: { type: Types.Int8, default: 3, min: 0, max: 3 },
