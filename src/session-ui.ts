@@ -133,7 +133,7 @@ export class SessionUISystem extends createSystem({
     if (hintStep < HINTS.length) this.setText(this.hintText, HINTS[hintStep]);
     if (cardVisible) {
       const streak = orb.getValue(FocusSession, 'streak') ?? 1;
-      this.setText(this.cardText, `+1 session · ${streak}-day streak`);
+      this.setText(this.cardText, `${streak}-day streak`);
     }
     const muted = orb.getValue(FocusSession, 'muted') ? 'muted' : 'on';
     this.setDisplay(this.muteOn, muted === 'on');

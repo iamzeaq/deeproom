@@ -210,6 +210,57 @@
           "envIndex": 1
         }
       }
+    },
+    {
+      "id": "finish-card",
+      "name": "Finish Card",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "ui-finish-card"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.41,
+          -0.5
+        ],
+        "scale": 0.1
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "card",
+          "offset": [
+            0,
+            0.21,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "chime",
+      "name": "Chime",
+      "transform": {
+        "position": [
+          0,
+          1.2,
+          0
+        ]
+      },
+      "components": {
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "loop": false,
+          "volume": 0.8,
+          "positional": false
+        },
+        "ChimeAudio": {}
+      }
     }
   ],
   "authoring": {

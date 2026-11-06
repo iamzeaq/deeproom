@@ -1,0 +1,53 @@
+<!--
+  Card shown above the orb after a completed session. Scene scale 0.1.
+  The separator dot is a shape: the bundled font has no middle-dot glyph.
+-->
+<style>
+  .card {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-top: 10px;
+    padding-bottom: 12px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: #6b5434;
+    background-color: #1c1813;
+  }
+
+  .eyebrow {
+    color: #e8b26a;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+  }
+
+  .row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .line {
+    color: #fdf3e3;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 2.5px;
+    background-color: #e8b26a;
+  }
+</style>
+<div class="card">
+  <span class="eyebrow">SESSION COMPLETE</span>
+  <div class="row">
+    <span class="line">+1 session</span>
+    <div class="dot"></div>
+    <span id="card-text" class="line">1-day streak</span>
+  </div>
+</div>

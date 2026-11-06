@@ -24,4 +24,5 @@ export default defineAssets({
   env2: texture('env2.jpg', 'Environment 2'),
   'ui-time-label': uikitml('time-label.uikitml', 'Time Label'),
   'ui-remaining-label': uikitml('remaining-label.uikitml', 'Remaining Label'),
+  'ui-finish-card': uikitml('finish-card.uikitml', 'Finish Card'),
 });

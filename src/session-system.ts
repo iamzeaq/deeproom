@@ -31,6 +31,8 @@ const DIAL_START = 0.03;
 const DIAL_STEP = 0.05;
 /** Horizontal travel that aborts a dial into a move (time is restored). */
 const DIAL_ABORT = 0.1;
+/** Seconds the finish card stays up after a completed session. */
+const CARD_SECONDS = 6;
 
 type GrabMode = 'pending' | 'dial' | 'move';
 
@@ -105,6 +107,7 @@ export class SessionSystem extends createSystem({
     this.travel = 0;
     this.mode = 'pending';
     this.baseIndex = entity.getValue(FocusSession, 'durationIndex') ?? 2;
+    entity.setValue(FocusSession, 'cardTime', 0);
   }
 
   private trackHeld(entity: Entity, delta: number): void {
@@ -171,7 +174,11 @@ export class SessionSystem extends createSystem({
   }
 
   /** Ends a running session; `completed` false means it was cancelled. */
-  protected finish(entity: Entity, completed: boolean): void {
+  private finish(entity: Entity, completed: boolean): void {
+    if (completed) {
+      entity.setValue(FocusSession, 'sessions', (entity.getValue(FocusSession, 'sessions') ?? 0) + 1);
+      entity.setValue(FocusSession, 'streak', Math.max(1, entity.getValue(FocusSession, 'streak') ?? 0));
+    }
     entity.setValue(
       FocusSession,
       'outcome',
@@ -214,6 +221,9 @@ export class SessionSystem extends createSystem({
 
   private endFadeOut(entity: Entity): void {
     this.setPhase(entity, SessionPhase.Idle);
+    if (entity.getValue(FocusSession, 'outcome') === SessionOutcome.Completed) {
+      entity.setValue(FocusSession, 'cardTime', CARD_SECONDS);
+    }
   }
 
   /** Leaving XR mid-session resets to idle without counting the session. */
