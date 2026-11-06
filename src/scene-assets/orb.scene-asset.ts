@@ -15,7 +15,7 @@ import {
 export const ORB_RADIUS = 0.06;
 
 /** Deterministic 64x64 radial falloff used for the soft halo (no DOM). */
-function createGlowTexture(): DataTexture {
+export function createGlowTexture(): DataTexture {
   const size = 64;
   const data = new Uint8Array(size * size * 4);
   for (let y = 0; y < size; y++) {

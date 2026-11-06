@@ -26,7 +26,9 @@ const HINT_TAP = 2;
 const HINT_DONE = 3;
 import {
   DURATIONS_MIN,
+  EnvChoice,
   FocusSession,
+  MuteToggle,
   SessionOutcome,
   SessionPhase,
 } from './session-components.js';
@@ -61,6 +63,8 @@ type GrabMode = 'pending' | 'dial' | 'move';
 export class SessionSystem extends createSystem({
   orbs: { required: [FocusOrb, FocusSession] },
   heldOrbs: { required: [FocusOrb, FocusSession, Grabbed] },
+  pinchedEnvChoices: { required: [EnvChoice, Grabbed] },
+  pinchedMute: { required: [MuteToggle, Grabbed] },
 }) {
   private grabSystem: GrabSystem | undefined;
   private initialized = new WeakSet<Entity>();
@@ -87,6 +91,8 @@ export class SessionSystem extends createSystem({
       this.queries.heldOrbs.subscribe('disqualify', (e) => {
         if (e.active) this.onGrabEnd(e);
       }),
+      this.queries.pinchedEnvChoices.subscribe('qualify', (e) => this.onPickEnv(e)),
+      this.queries.pinchedMute.subscribe('qualify', () => this.onToggleMute()),
       this.world.visibilityState.subscribe((state) => {
         this.blurred = state === VisibilityState.VisibleBlurred;
         if (state === VisibilityState.NonImmersive) this.abortAll();
@@ -115,6 +121,24 @@ export class SessionSystem extends createSystem({
       envIndex: entity.getValue(FocusSession, 'envIndex') ?? 0,
       muted: entity.getValue(FocusSession, 'muted') ?? false,
     });
+  }
+
+  /** Pinching an environment orb selects it (between sessions only). */
+  private onPickEnv(choice: Entity): void {
+    const envIndex = choice.getValue(EnvChoice, 'envIndex') ?? 0;
+    for (const orb of this.queries.orbs.entities) {
+      if (orb.getValue(FocusSession, 'phase') !== SessionPhase.Idle) continue;
+      orb.setValue(FocusSession, 'envIndex', envIndex);
+      this.persistPrefs(orb);
+    }
+  }
+
+  /** Pinching the mute token toggles all Deeproom audio, any time. */
+  private onToggleMute(): void {
+    for (const orb of this.queries.orbs.entities) {
+      orb.setValue(FocusSession, 'muted', !orb.getValue(FocusSession, 'muted'));
+      this.persistPrefs(orb);
+    }
   }
 
   update(delta: number): void {

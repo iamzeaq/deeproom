@@ -292,6 +292,152 @@
           ]
         }
       }
+    },
+    {
+      "id": "env-choice-1",
+      "name": "Environment 1 Orb",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "env-orb-1",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          -0.13,
+          1.2,
+          -0.5
+        ]
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "envChoice",
+          "offset": [
+            -0.13,
+            0,
+            0
+          ]
+        },
+        "EnvChoice": {
+          "envIndex": 0
+        },
+        "OneHandGrabbable": {
+          "rotate": false,
+          "translate": false
+        }
+      }
+    },
+    {
+      "id": "env-choice-2",
+      "name": "Environment 2 Orb",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "env-orb-2",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          0.13,
+          1.2,
+          -0.5
+        ]
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "envChoice",
+          "offset": [
+            0.13,
+            0,
+            0
+          ]
+        },
+        "EnvChoice": {
+          "envIndex": 1
+        },
+        "OneHandGrabbable": {
+          "rotate": false,
+          "translate": false
+        }
+      }
+    },
+    {
+      "id": "mute-token",
+      "name": "Mute Token",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "mute-token",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          0.1,
+          1.115,
+          -0.5
+        ]
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "mute",
+          "offset": [
+            0.1,
+            -0.085,
+            0
+          ]
+        },
+        "MuteToggle": {},
+        "OneHandGrabbable": {
+          "rotate": false,
+          "translate": false
+        }
+      }
+    },
+    {
+      "id": "mute-icon",
+      "name": "Mute Icon",
+      "metadata": {
+        "iwsdk.validation": {
+          "allowFloating": true
+        }
+      },
+      "content": {
+        "type": "asset",
+        "asset": "ui-mute-icon"
+      },
+      "transform": {
+        "position": [
+          0.1,
+          1.115,
+          -0.494
+        ],
+        "scale": 0.1
+      },
+      "components": {
+        "OrbAttachment": {
+          "role": "mute",
+          "offset": [
+            0.1,
+            -0.085,
+            0.0045
+          ]
+        }
+      }
     }
   ],
   "authoring": {

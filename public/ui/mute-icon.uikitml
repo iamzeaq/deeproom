@@ -1,0 +1,29 @@
+<!-- Speaker glyph drawn on the mute token. Scene scale 0.1. -->
+<style>
+  .root {
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    color: #f3e6d0;
+  }
+
+  .icon-muted {
+    width: 20px;
+    height: 20px;
+    color: #e8866a;
+  }
+</style>
+<div class="root">
+  <div id="icon-on">
+    <Volume2 class="icon"></Volume2>
+  </div>
+  <div id="icon-off" style="display: none">
+    <VolumeX class="icon-muted"></VolumeX>
+  </div>
+</div>
