@@ -1,5 +1,6 @@
 import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
+import { DemoSystem } from './demo-system.js';
 import { ImmersionSystem } from './immersion.js';
 import { OrbPlacementSystem } from './orb-placement.js';
 import { SessionSystem } from './session-system.js';
@@ -13,4 +14,5 @@ World.create(
   world.registerSystem(SessionSystem);
   world.registerSystem(SessionUISystem);
   world.registerSystem(ImmersionSystem);
+  world.registerSystem(DemoSystem);
 });

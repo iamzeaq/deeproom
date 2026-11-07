@@ -7,7 +7,7 @@ import {
   Vector3,
   VisibilityState,
 } from '@iwsdk/core';
-import { FAST_SESSION_SECONDS, isFastMode } from './dev-flags.js';
+import { FAST_SESSION_SECONDS, isDemoMode, isFastMode } from './dev-flags.js';
 import { FocusOrb } from './orb-components.js';
 import { ReleaseTracker } from './release-tracker.js';
 import {
@@ -85,6 +85,7 @@ export class SessionSystem extends createSystem({
   private release = new ReleaseTracker();
   private returning: Entity | null = null;
   private blurred = false;
+  private readonly demo = isDemoMode();
 
   init(): void {
     this.grabSystem = this.world.getSystem(GrabSystem);
@@ -107,7 +108,12 @@ export class SessionSystem extends createSystem({
   private setup(entity: Entity): void {
     if (this.initialized.has(entity)) return;
     this.initialized.add(entity);
-    entity.setValue(FocusSession, 'fastMode', isFastMode());
+    entity.setValue(FocusSession, 'fastMode', this.demo || isFastMode());
+    if (this.demo) {
+      // Demo mode starts from a clean slate and never touches storage.
+      entity.setValue(FocusSession, 'hintStep', HINT_DONE);
+      return;
+    }
     const prefs = loadPrefs();
     entity.setValue(FocusSession, 'durationIndex', prefs.durationIndex);
     entity.setValue(FocusSession, 'envIndex', prefs.envIndex);
@@ -120,6 +126,7 @@ export class SessionSystem extends createSystem({
 
   /** Persists the user's duration, environment and mute choices. */
   protected persistPrefs(entity: Entity): void {
+    if (this.demo) return;
     savePrefs({
       durationIndex: entity.getValue(FocusSession, 'durationIndex') ?? 2,
       envIndex: entity.getValue(FocusSession, 'envIndex') ?? 0,
@@ -199,7 +206,7 @@ export class SessionSystem extends createSystem({
   private advanceHint(entity: Entity, from: number, to: number): void {
     if (entity.getValue(FocusSession, 'hintStep') !== from) return;
     entity.setValue(FocusSession, 'hintStep', to);
-    if (to === HINT_DONE) setOnboarded();
+    if (to === HINT_DONE && !this.demo) setOnboarded();
   }
 
   private trackHeld(entity: Entity, delta: number): void {
@@ -264,7 +271,8 @@ export class SessionSystem extends createSystem({
     }
   }
 
-  private startSession(entity: Entity): void {
+  /** Starts a focus session (also driven by the ?demo=1 autoplay). */
+  startSession(entity: Entity): void {
     const index = entity.getValue(FocusSession, 'durationIndex') ?? 2;
     const seconds = entity.getValue(FocusSession, 'fastMode')
       ? FAST_SESSION_SECONDS
@@ -276,7 +284,7 @@ export class SessionSystem extends createSystem({
     // Starting a session completes onboarding, whichever hint was showing.
     if ((entity.getValue(FocusSession, 'hintStep') ?? HINT_DONE) < HINT_DONE) {
       entity.setValue(FocusSession, 'hintStep', HINT_DONE);
-      setOnboarded();
+      if (!this.demo) setOnboarded();
     }
     this.persistPrefs(entity);
     this.setPhase(entity, SessionPhase.FadingIn);
@@ -284,7 +292,11 @@ export class SessionSystem extends createSystem({
 
   /** Ends a running session; `completed` false means it was cancelled. */
   private finish(entity: Entity, completed: boolean): void {
-    if (completed) {
+    if (completed && this.demo) {
+      // Demo: count in memory only; the streak is "today", so at least 1.
+      entity.setValue(FocusSession, 'sessions', (entity.getValue(FocusSession, 'sessions') ?? 0) + 1);
+      entity.setValue(FocusSession, 'streak', Math.max(1, entity.getValue(FocusSession, 'streak') ?? 0));
+    } else if (completed) {
       const stats = recordCompletedSession();
       entity.setValue(FocusSession, 'sessions', stats.sessions);
       entity.setValue(FocusSession, 'streak', stats.streak);
@@ -295,6 +307,18 @@ export class SessionSystem extends createSystem({
       completed ? SessionOutcome.Completed : SessionOutcome.Cancelled,
     );
     this.setPhase(entity, SessionPhase.FadingOut);
+  }
+
+  /**
+   * Cancels a running session as a flick release would, then eases the orb
+   * back to `rest` (world space). Used by the ?demo=1 autoplay.
+   */
+  cancelByFlick(entity: Entity, rest: Vector3): void {
+    const phase = entity.getValue(FocusSession, 'phase');
+    if (phase !== SessionPhase.FadingIn && phase !== SessionPhase.Running) return;
+    this.finish(entity, false);
+    this.restPos.copy(rest);
+    this.returning = entity;
   }
 
   private setPhase(

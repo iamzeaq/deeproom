@@ -34,6 +34,14 @@ Open the app with `?fast=1` (dev server only) to make every session 10 seconds
 long, so the whole loop can be tested or filmed quickly. Fast mode also accepts
 slow taps (up to 3 s) for laggy emulators and screen recorders.
 
+Open with `?demo=1` to auto-play the whole loop with no input: the orb spawns,
+moves onto the table, dials to 25 min and runs a 10 s session in the first
+environment (chime, fade back, streak card), then repeats in the second
+environment with a flick-cancel, forever. Combine with `?emulate=1` to run it in
+the IWER emulator on any host, including the production build
+(`/?emulate=1&demo=1`). Demo mode never writes to localStorage. On a real
+headset, tap once to enter XR; browsers may also block audio until a tap.
+
 ## Assets to replace
 
 Placeholders, keep the file names when dropping in CC0 assets:

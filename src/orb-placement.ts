@@ -108,7 +108,8 @@ export class OrbPlacementSystem extends createSystem({
     this.setWorldPosition(entity, this.worldPos);
   }
 
-  private spawnInFront(entity: Entity): void {
+  /** Places the orb in front of and below the viewer's head. */
+  spawnInFront(entity: Entity): void {
     if (entity.hasComponent(Grabbed)) return;
     const head = this.player.head;
     head.updateWorldMatrix(true, false);
@@ -130,7 +131,8 @@ export class OrbPlacementSystem extends createSystem({
     this.setWorldPosition(entity, this.worldPos);
   }
 
-  private snapToSurface(entity: Entity): void {
+  /** Settles the orb onto a horizontal plane just below it, if any. */
+  snapToSurface(entity: Entity): void {
     const object = entity.object3D;
     if (object == null) return;
     object.getWorldPosition(this.worldPos);
