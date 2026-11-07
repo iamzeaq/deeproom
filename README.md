@@ -57,6 +57,7 @@ Equirectangular images (2:1) of 2048x1024 or smaller keep memory low on Quest.
 ## Code map
 
 - `src/session-system.ts`: pinch gestures (tap, time dial, flick) and the session state machine
+- `src/demo-system.ts`: `?demo=1` autoplay that drives the full loop with no input
 - `src/immersion.ts`: environment fade, ambient/chime audio, mute, orb shrink and pulse
 - `src/session-ui.ts`: orb-attached labels and controls, facing the user
 - `src/orb-placement.ts`: spawn in front of the user, table snap and anchoring
